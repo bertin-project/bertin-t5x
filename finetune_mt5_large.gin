@@ -1,0 +1,16 @@
+from __gin__ import dynamic_registration
+
+include 't5x/examples/t5/mt5/large.gin'
+include 't5x/configs/runs/finetune.gin'
+
+# Register necessary SeqIO Tasks/Mixtures.
+import t5.data.mixtures
+
+import tasks
+
+INITIAL_CHECKPOINT_PATH = "gs://t5-data/pretrained_models/t5x/mt5_large/checkpoint_1000000"
+MIXTURE_OR_TASK_NAME = "mc4_es_gaussian_span_corruption"
+TASK_FEATURE_LENGTHS = {"inputs": 512, "targets": 512}
+TRAIN_STEPS = 2000000
+DROPOUT_RATE = 0.0
+BATCH_SIZE = 64

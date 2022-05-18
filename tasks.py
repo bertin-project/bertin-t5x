@@ -49,9 +49,10 @@ def target_to_key(x, key_map, target_key):
 dataset_name = 'bertin-project/mc4-es-sampled'
 dataset_params = {"path": dataset_name, "name": "gaussian", "streaming": True}
 dataset_shapes = None
-vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/oscar/es_32000_bpe.sp.model", extra_ids=100)
+#vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/oscar/es_32000_bpe.sp.model", extra_ids=100)
+vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/wikipedia/es_32000_unigram.sp.model", extra_ids=100)
 TaskRegistry.add(
-    "mc4_es_gaussian_span_corruption_pretrain",
+    "mc4_es_gaussian_span_corruption_unigram",
     source=seqio.FunctionDataSource(
         dataset_fn=functools.partial(dataset_fn, dataset_params=dataset_params),
         splits=("train", "validation"),
