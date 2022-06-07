@@ -8,8 +8,9 @@ import t5.data.mixtures
 
 import tasks
 
-INITIAL_CHECKPOINT_PATH = "gs://t5-data/pretrained_models/t5x/mt5_large/checkpoint_1000000"
-MIXTURE_OR_TASK_NAME = "mc4_es_gaussian_span_corruption"
+# INITIAL_CHECKPOINT_PATH = "gs://t5-data/pretrained_models/t5x/mt5_large/checkpoint_1000000"
+INITIAL_CHECKPOINT_PATH = "gs://bertin-project/t5/mt5_large/checkpoint_1720000"
+MIXTURE_OR_TASK_NAME = "mc4_es_gaussian_span_corruption_mt5"
 TASK_FEATURE_LENGTHS = {"inputs": 512, "targets": 512}
 TRAIN_STEPS = 2000000
 DROPOUT_RATE = 0.0

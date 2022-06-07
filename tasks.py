@@ -73,3 +73,34 @@ TaskRegistry.add(
     output_features={"targets": seqio.Feature(vocabulary=vocabulary, add_eos=True)},
     metric_fns=[]
 )
+
+
+# Final pretraining task used in Raffel et al., 2019 adaptated to NCC
+dataset_name = 'bertin-project/mc4-es-sampled'
+dataset_params = {"path": dataset_name, "name": "gaussian", "streaming": True}
+dataset_shapes = None
+#vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/oscar/es_32000_bpe.sp.model", extra_ids=100)
+#vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/wikipedia/es_32000_unigram.sp.model", extra_ids=100)
+vocabulary = seqio.SentencePieceVocabulary("gs://t5-data/vocabs/mc4.250000.100extra/sentencepiece.model")
+TaskRegistry.add(
+    "mc4_es_gaussian_span_corruption_mt5",
+    source=seqio.FunctionDataSource(
+        dataset_fn=functools.partial(dataset_fn, dataset_params=dataset_params),
+        splits=("train", "validation"),
+        caching_permitted=False,
+        num_input_examples=dataset_shapes,
+    ),
+    preprocessors=[
+        functools.partial(
+            target_to_key, key_map={
+                "inputs": None,
+                "targets": None,
+            }, target_key="targets"),
+        seqio.preprocessors.tokenize,
+        # seqio.CacheDatasetPlaceholder(),
+        preprocessors.span_corruption,
+        seqio.preprocessors.append_eos_after_trim,
+    ],
+    output_features={"targets": seqio.Feature(vocabulary=vocabulary, add_eos=True)},
+    metric_fns=[]
+)
