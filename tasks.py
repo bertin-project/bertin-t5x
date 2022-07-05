@@ -21,14 +21,19 @@ DEFAULT_OUTPUT_FEATURES = {
 
 
 def gen_dataset(split, shuffle=False, seed=None, column="text", dataset_params=None):
+    skip = dataset_params.pop("skip", None)
     dataset = load_dataset(**dataset_params)
     if shuffle:
         if seed:
             dataset = dataset.shuffle(seed=seed)
         else:
             dataset = dataset.shuffle()
+    dataset = dataset[split]
+    if skip is not None:
+        print(f"Skipping {skip} samples...")
+        dataset = dataset.skip(skip)
     while True:
-        for item in dataset[str(split)]:
+        for item in dataset:
             yield item[column]
 
 
@@ -47,7 +52,7 @@ def target_to_key(x, key_map, target_key):
 
 # Final pretraining task used in Raffel et al., 2019 adaptated to NCC
 dataset_name = 'bertin-project/mc4-es-sampled'
-dataset_params = {"path": dataset_name, "name": "gaussian", "streaming": True}
+dataset_params = {"path": dataset_name, "name": "gaussian", "streaming": True, "skip": 20000000}
 dataset_shapes = None
 #vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/oscar/es_32000_bpe.sp.model", extra_ids=100)
 vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/wikipedia/es_32000_unigram.sp.model", extra_ids=100)
@@ -77,7 +82,7 @@ TaskRegistry.add(
 
 # Final pretraining task used in Raffel et al., 2019 adaptated to NCC
 dataset_name = 'bertin-project/mc4-es-sampled'
-dataset_params = {"path": dataset_name, "name": "gaussian", "streaming": True}
+dataset_params = {"path": dataset_name, "name": "gaussian", "streaming": True, "skip": 10000000}
 dataset_shapes = None
 #vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/oscar/es_32000_bpe.sp.model", extra_ids=100)
 #vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/wikipedia/es_32000_unigram.sp.model", extra_ids=100)

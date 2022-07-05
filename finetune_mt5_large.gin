@@ -9,9 +9,11 @@ import t5.data.mixtures
 import tasks
 
 # INITIAL_CHECKPOINT_PATH = "gs://t5-data/pretrained_models/t5x/mt5_large/checkpoint_1000000"
-INITIAL_CHECKPOINT_PATH = "gs://bertin-project/t5/mt5_large/checkpoint_1720000"
+INITIAL_CHECKPOINT_PATH = "gs://bertin-project/t5/mt5_large/checkpoint_2942000"
 MIXTURE_OR_TASK_NAME = "mc4_es_gaussian_span_corruption_mt5"
 TASK_FEATURE_LENGTHS = {"inputs": 512, "targets": 512}
-TRAIN_STEPS = 2000000
+#TRAIN_STEPS = 2000000
+TRAIN_STEPS = 20000000  # Original 2000000 (1M over t5_1_1 1M large chekpoint). Let's try 20M (it should be 32 (2048/64) but it might overfit)
+
 DROPOUT_RATE = 0.0
-BATCH_SIZE = 64
+BATCH_SIZE = 64  # Is it 64 per TPU? :\ Then we need 2018/(64*8)=4M steps, not 32M nor 20M!!!
