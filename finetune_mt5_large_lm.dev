@@ -1,0 +1,1 @@
+tensorboard dev upload --logdir gs://bertin-project/t5/mt5_large_lm --name "BERTIN mT5 large lm" --description "$(hostname)"

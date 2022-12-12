@@ -44,10 +44,21 @@ def dataset_fn(split, shuffle_files, seed=None, dataset_params=None):
     )
 
 
+#@utils.map_over_dataset
+#def target_to_key(x, key_map, target_key):
+#    """Assign the value from the dataset to target_key in key_map"""
+#    return {**key_map, target_key: x}
+
+
 @utils.map_over_dataset
 def target_to_key(x, key_map, target_key):
     """Assign the value from the dataset to target_key in key_map"""
-    return {**key_map, target_key: x}
+    if not isinstance(target_key, (list, tuple)):
+        target_key = [target_key]
+    new_map = {**key_map}
+    for key in target_key:
+        new_map[key] = x
+    return new_map
 
 
 # Final pretraining task used in Raffel et al., 2019 adaptated to NCC
@@ -80,7 +91,7 @@ TaskRegistry.add(
 )
 
 
-# Final pretraining task used in Raffel et al., 2019 adaptated to NCC
+# Final pretraining task used in Raffel et al., 2019 adaptated to mc4-es
 dataset_name = 'bertin-project/mc4-es-sampled'
 dataset_params = {"path": dataset_name, "name": "gaussian", "streaming": True, "skip": 10000000}
 dataset_shapes = None
@@ -107,5 +118,39 @@ TaskRegistry.add(
         seqio.preprocessors.append_eos_after_trim,
     ],
     output_features={"targets": seqio.Feature(vocabulary=vocabulary, add_eos=True)},
+    metric_fns=[]
+)
+
+
+# Final pretraining task used in Raffel et al., 2019 adaptated to NCC
+dataset_name = 'bertin-project/mc4-es-sampled'
+dataset_params = {"path": dataset_name, "name": "gaussian", "streaming": True, "skip": 0}
+dataset_shapes = None
+#vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/oscar/es_32000_bpe.sp.model", extra_ids=100)
+#vocabulary = seqio.SentencePieceVocabulary("gs://bertin-project/t5/vocabs/wikipedia/es_32000_unigram.sp.model", extra_ids=100)
+vocabulary = seqio.SentencePieceVocabulary("gs://t5-data/vocabs/mc4.250000.100extra/sentencepiece.model")
+TaskRegistry.add(
+    "mc4_es_gaussian_prefix_lm_mt5",
+    source=seqio.FunctionDataSource(
+        dataset_fn=functools.partial(dataset_fn, dataset_params=dataset_params),
+        splits=("train", "validation"),
+        caching_permitted=False,
+        num_input_examples=dataset_shapes,
+    ),
+    preprocessors=[
+        functools.partial(
+            target_to_key, key_map={
+                "inputs": None,
+                "targets": None,
+            }, target_key=["inputs", "targets"]),
+        seqio.preprocessors.tokenize,
+        # seqio.CacheDatasetPlaceholder(),
+        preprocessors.prefix_lm,
+        seqio.preprocessors.append_eos_after_trim,
+    ],
+    output_features={
+        "inputs": seqio.Feature(vocabulary=vocabulary, add_eos=True, required=False),
+        "targets": seqio.Feature(vocabulary=vocabulary, add_eos=True)
+    },
     metric_fns=[]
 )
